@@ -19,14 +19,14 @@ def run_python_file(working_directory, file_path, args=None):
             command.extend(args)
         complete_comm = subprocess.run(command, cwd=abs_working_dir, capture_output=True,  timeout=30, text=True)
 
-        output_str = []
+        output = []
         if complete_comm.returncode != 0:
-            output_str.append(f'Process exited with code {complete_comm.returncode}')
+            output.append(f'Process exited with code {complete_comm.returncode}')
         if not complete_comm.stdout and not complete_comm.stderr:
-            output_str.append('No output produced')
+            output.append('No output produced')
         else:
-            output_str.append(f'STDOUT: {complete_comm.stdout}')
-            output_str.append(f'STDERR: {complete_comm.stderr}')
-        return "\n".join(output_str)
+            output.append(f'STDOUT: {complete_comm.stdout}')
+            output.append(f'STDERR: {complete_comm.stderr}')
+        return "\n".join(output)
     except Exception as e:
         return f'Error: {e}'
