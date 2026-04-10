@@ -6,6 +6,7 @@ from google import genai
 from google.genai import types
 from prompts import system_prompt
 from functions.call_function import available_functions
+from functions.call_function import call_function
 
 def main():
     parser = argparse.ArgumentParser(description="AI Code Assistant")
@@ -40,9 +41,20 @@ def generate_response(client, messages, verbose):
     if verbose:
         print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
         print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+
+    function_results = []
     if response.function_calls:
         for function_call in response.function_calls:
-            print(f"Calling function: {function_call.name}({function_call.args})")
+            function_call_result = call_function(function_call, verbose)
+            if not function_call_result.parts:
+                raise Exception("call_function.parts list is empty")
+            if function_call_result.parts[0].function_response == None:
+                raise Exception(".function_response of first item in list of parts is None")
+            if function_call_result.parts[0].function_response.response == None:
+                raise Exception(".response field of FunctionResponse object is None")
+            function_results.append(function_call_result.parts[0])
+            if verbose:
+                print(f"-> {function_call_result.parts[0].function_response.response}")
     else:
         print(response.text)
 
