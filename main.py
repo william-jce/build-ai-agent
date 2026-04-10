@@ -24,7 +24,13 @@ def main():
     if args.verbose:
         print(f"User prompt: {args.user_prompt}\n")
 
-    generate_response(client, messages, args.verbose)
+    for _ in range(20):
+        response = generate_response(client, messages, args.verbose)
+        if response:
+            print(response)
+            return
+        
+    sys.exit(1)
 
 def generate_response(client, messages, verbose):
     response = client.models.generate_content(
@@ -42,6 +48,14 @@ def generate_response(client, messages, verbose):
         print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
         print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
 
+    if response.candidates:
+        for candidate in response.candidates:
+            messages.append(candidate.content)
+
+
+    if not response.function_calls:
+        return response.text
+
     function_results = []
     if response.function_calls:
         for function_call in response.function_calls:
@@ -55,8 +69,8 @@ def generate_response(client, messages, verbose):
             function_results.append(function_call_result.parts[0])
             if verbose:
                 print(f"-> {function_call_result.parts[0].function_response.response}")
-    else:
-        print(response.text)
+
+    messages.append(types.Content(role="user", parts=function_results))
 
 if __name__ == "__main__":
     main()
