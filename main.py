@@ -30,6 +30,7 @@ def main():
             print(response)
             return
         
+    print("Maximum number of iterations reached")
     sys.exit(1)
 
 def generate_response(client, messages, verbose):
