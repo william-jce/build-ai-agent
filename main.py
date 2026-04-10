@@ -53,10 +53,6 @@ def generate_response(client, messages, verbose):
         for candidate in response.candidates:
             messages.append(candidate.content)
 
-
-    if not response.function_calls:
-        return response.text
-
     function_results = []
     if response.function_calls:
         for function_call in response.function_calls:
@@ -70,6 +66,8 @@ def generate_response(client, messages, verbose):
             function_results.append(function_call_result.parts[0])
             if verbose:
                 print(f"-> {function_call_result.parts[0].function_response.response}")
+    else:
+        return response.text
 
     messages.append(types.Content(role="user", parts=function_results))
 
